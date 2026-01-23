@@ -11,7 +11,7 @@ int main()
 {
     // Define file paths
     std::string root_path = PROJECT_ROOT_DIR; 
-    std::string pcdFile = root_path + "/data/scans_S2.pcd";
+    std::string pcdFile = root_path + "/data/scans.pcd";
     std::string file_name = root_path + "/data/point_normal_sparse_S2.csv";
 
     // Load the point cloud
