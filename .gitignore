@@ -39,3 +39,11 @@
 
 # debug information files
 *.dwo
+
+# Build directories
+build/
+bin/
+lib/
+*.o
+*.so
+*.a

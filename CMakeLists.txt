@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(surface_contact)
 
-list(APPEND CMAKE_PREFIX_PATH /opt/ros/noetic)
+add_definitions(-DPROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 find_package(PCL 1.14 REQUIRED COMPONENTS
     common

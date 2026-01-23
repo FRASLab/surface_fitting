@@ -3,7 +3,6 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/surface/on_nurbs/fitting_surface_tdm.h>
-#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/surface/3rdparty/opennurbs/opennurbs.h>
 #include <pcl/surface/on_nurbs/triangulation.h>
 #include <pcl/io/vtk_lib_io.h>
