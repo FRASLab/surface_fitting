@@ -9,23 +9,17 @@ namespace sr = surface_reconstructor;
 
 int main()
 {
+    // Define file paths
+    std::string root_path = PROJECT_ROOT_DIR; 
+    std::string pcdFile = root_path + "/data/scans_S2.pcd";
+    std::string file_name = root_path + "/data/point_normal_sparse_S2.csv";
+
     // Load the point cloud
-    // std::string pcdFile = "/home/wsl/proj/pcl/test/milk.pcd";
-    // std::string pcdFile = "/home/wsl/proj/skyvortex_mujoco/assets/NURBS.pcd";
-    // std::string pcdFile = "/home/wsl/proj/planning_ws/src/surface_reconstructor/data/blade_segment.pcd";
-    //    std::string pcdFile = "/home/wsl/proj/planning_ws/src/surface_reconstructor/data/pointcloud_blade_trans_02.pcd";
-    // std::string pcdFile = "/home/wsl/proj/planning_ws/src/surface_reconstructor/data/pointcloud_blade_trans_02.pcd";
-    // std::string pcdFile = "/home/wsl/proj/planning_ws/src/surface_reconstructor/data/surf.pcd";
-    std::string pcdFile = "/home/wsl/proj/planning_ws/src/surface_reconstructor/data/scans_S2.pcd";
     const auto nurbs = new sr::Nurbs(pcdFile);
     nurbs->fitSurface();
     auto ik = new dp::InvKin(nurbs);
     ik->setLinkLength(1.0);
-    // auto qs = ik->xToQs(0.2,0.2);
-    // std::cout << "qs: " << qs.transpose() << std::endl;
-    // return 0;
 
-    std::string file_name = "/home/wsl/proj/planning_ws/src/surface_reconstructor/data/point_normal_sparse_S2.csv";
     std::ofstream file(file_name);
     file << "x,y,z,nx,ny,nz" << std::endl;
 
