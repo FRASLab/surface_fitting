@@ -214,6 +214,28 @@ public:
      */
     bool saveSurfaceAsStl(const std::string& filename, double resolution = 50) const;
 
+    /**
+     * @brief Convert the fitted NURBS surface into a triangle mesh.
+     *
+     * The surface is sampled and triangulated using the given sampling
+     * resolution. Higher values produce a finer mesh (more triangles).
+     *
+     * @param resolution Sampling resolution (samples per parametric axis). Default is 50.
+     * @return 0 on success, non-zero on failure.
+     */
+    int convertToMesh(double resolution = 64);
+
+    /**
+     * @brief Get the generated mesh triangles.
+     *
+     * Each row of the returned matrix represents a single triangle and
+     * stores 9 values: the three vertices' coordinates in the order
+     * [x1, y1, z1, x2, y2, z2, x3, y3, z3].
+     *
+     * @return A const reference to the matrix of triangle data.
+     */
+    const Eigen::MatrixXd& getMeshTriangles() const { return mesh_triangles_; }
+
 
 private:
     bool is_fitted_ = false; // whether the surface has been fitted or not
@@ -223,6 +245,7 @@ private:
     Eigen::Vector3d refNormal_ = -Eigen::Vector3d::UnitZ(); // the reference normal for fitting the surface
     unsigned refinement_ = 2;
     unsigned iterations_ = 10;
+    Eigen::MatrixXd mesh_triangles_; // each row contains a triangle (9 values: 3 vertices x 3 coordinates)
 };
 
 }

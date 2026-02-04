@@ -33,6 +33,15 @@ target_link_libraries(test_demo
         ${VTK_LIBRARIES}
         surface_contact)
 
+add_executable(test_mesh_conversion src/test_mesh_conversion.cpp)
+add_dependencies(test_mesh_conversion surface_contact)
+target_link_libraries(test_mesh_conversion
+        ${PCL_COMMON_LIBRARIES}
+        ${PCL_SURFACE_LIBRARIES}
+        ${PCL_IO_LIBRARIES}
+        ${VTK_LIBRARIES}
+        surface_contact)
+
 set(INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/surface_contact)
 
 configure_file(surface_contactConfig.cmake.in

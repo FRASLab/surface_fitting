@@ -271,4 +271,40 @@ bool Nurbs::saveSurfaceAsStl(const std::string& filename, const double resolutio
     return pcl::io::savePolygonFileSTL(filename, mesh);
 }
 
+int Nurbs::convertToMesh(double resolution)
+{
+    if (!is_fitted_)
+    {
+        std::cout << "NURBS not fitted yet!" << std::endl;
+        return -1;
+    }
+
+    pcl::PolygonMesh mesh;
+    pcl::on_nurbs::Triangulation::convertSurface2PolygonMesh(surface_, mesh, resolution);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr mesh_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromPCLPointCloud2(mesh.cloud, *mesh_cloud);
+
+    mesh_triangles_.resize(static_cast<Eigen::Index>(mesh.polygons.size()), 9);
+
+    for (size_t i = 0; i < mesh.polygons.size(); ++i)
+    {
+        const auto& polygon = mesh.polygons[i];
+        Eigen::Matrix<double, 1, 9> triangle;
+
+        if (polygon.vertices.size() < 3) continue;
+        
+        for (int j = 0; j < 3; ++j)
+        {
+            const pcl::PointXYZ& point = mesh_cloud->at(polygon.vertices[j]);
+            triangle(j * 3) = point.x;
+            triangle(j * 3 + 1) = point.y;
+            triangle(j * 3 + 2) = point.z;
+        }
+        mesh_triangles_.row(i) = triangle;
+    }
+
+    return 0;
+}
+
 
