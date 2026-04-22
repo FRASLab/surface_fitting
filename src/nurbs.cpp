@@ -195,6 +195,78 @@ int Nurbs::fitSurface(const Eigen::Vector3d& refNormal)
     return 0;
 }
 
+int Nurbs::fitSurfaceByCorners(const Eigen::Vector3d& refNormal)
+{
+    // Initialize NURBS data
+    pcl::on_nurbs::NurbsDataSurface data;
+    for (const auto& point : cloud_->points)
+    {
+        data.interior.emplace_back(point.x, point.y, point.z);
+    }
+    refNormal_ = refNormal;
+
+    // Compute centroid
+    Eigen::Vector3d centroid = Eigen::Vector3d::Zero();
+    for (const auto& point : cloud_->points)
+    {
+        centroid += Eigen::Vector3d(point.x, point.y, point.z);
+    }
+    centroid /= static_cast<double>(cloud_->points.size());
+
+    // Build two orthogonal basis vectors in the plane perpendicular to refNormal.
+    // e1 x e2 = n, so the initialised surface normal is consistent with refNormal.
+    const Eigen::Vector3d n = refNormal.normalized();
+    Eigen::Vector3d e1 = (std::abs(n.dot(Eigen::Vector3d::UnitX())) < 0.9)
+                         ? n.cross(Eigen::Vector3d::UnitX()).normalized()
+                         : n.cross(Eigen::Vector3d::UnitY()).normalized();
+    const Eigen::Vector3d e2 = n.cross(e1).normalized();
+
+    // Find bounding box of the projected cloud
+    double s_min = std::numeric_limits<double>::max();
+    double s_max = std::numeric_limits<double>::lowest();
+    double t_min = std::numeric_limits<double>::max();
+    double t_max = std::numeric_limits<double>::lowest();
+
+    for (const auto& point : cloud_->points)
+    {
+        const Eigen::Vector3d dp = Eigen::Vector3d(point.x, point.y, point.z) - centroid;
+        const double s = dp.dot(e1);
+        const double t = dp.dot(e2);
+        s_min = std::min(s_min, s);
+        s_max = std::max(s_max, s);
+        t_min = std::min(t_min, t);
+        t_max = std::max(t_max, t);
+    }
+
+    // Reconstruct the four 3-D corners (ll=lower-left, lr=lower-right, ur=upper-right, ul=upper-left)
+    auto toON = [](const Eigen::Vector3d& v) { return ON_3dPoint(v.x(), v.y(), v.z()); };
+    const ON_3dPoint ll = toON(centroid + s_min * e1 + t_min * e2);
+    const ON_3dPoint lr = toON(centroid + s_max * e1 + t_min * e2);
+    const ON_3dPoint ur = toON(centroid + s_max * e1 + t_max * e2);
+    const ON_3dPoint ul = toON(centroid + s_min * e1 + t_max * e2);
+
+    surface_ = pcl::on_nurbs::FittingSurface::initNurbs4Corners(4, ll, lr, ur, ul);
+    pcl::on_nurbs::FittingSurface fit(&data, surface_);
+
+    // NURBS refinement
+    for (unsigned i = 0; i < refinement_; i++)
+    {
+        fit.refine(0);
+        fit.refine(1);
+    }
+
+    // Fitting iterations
+    for (unsigned i = 0; i < iterations_; i++)
+    {
+        fit.assemble(params_);
+        fit.solve();
+    }
+
+    surface_ = fit.m_nurbs;
+    is_fitted_ = true;
+    return 0;
+}
+
 //int Nurbs::convertToMarker(visualization_msgs::Marker& marker) const {
 //    // Reset the marker's properties
 //    marker.type = visualization_msgs::Marker::TRIANGLE_LIST;

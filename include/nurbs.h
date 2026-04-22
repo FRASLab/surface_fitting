@@ -157,6 +157,16 @@ public:
     */
     int fitSurface(const Eigen::Vector3d& refNormal = -Eigen::Vector3d::UnitZ());
 
+    /**
+    * @brief Fit the surface to the input point cloud using the four bounding-box corners
+    *        (derived from the extremes of the cloud projected onto the plane perpendicular
+    *        to refNormal) to initialise the NURBS via initNurbs4Corners.
+    * @param refNormal Reference normal that defines the fitting plane orientation.
+    *                  The initialised surface normal will be consistent with this vector.
+    * @return 0 if successful
+    */
+    int fitSurfaceByCorners(const Eigen::Vector3d& refNormal = -Eigen::Vector3d::UnitZ());
+
 //    /**
 //    * @brief Convert the fitted surface to a marker for visualization.
 //    * @param marker The reference to the output marker.
